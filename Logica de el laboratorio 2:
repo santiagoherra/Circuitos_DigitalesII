@@ -1,0 +1,10 @@
+Logica de el laboratorio 2:
+entradas:
+clk, reset, tarjeta_recibida, tipo_tarjeta, pin(16bits , 4 bits por numero), digito, digito_stb, tipo_trans, monto(32), 
+monto_stb, 
+
+registros internos:
+balance(64 bits)
+
+salidas:
+balance_actualizado, entregar_dinero, fondos_insuficientes, pin incorrecto, advertencia, bloqueo 

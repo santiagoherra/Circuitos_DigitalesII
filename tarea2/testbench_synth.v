@@ -1,4 +1,5 @@
-`include "calculadora8bit.v"
+`include "synth.v"
+`include "../trabajo_clase/yosys/cmos_cells_delay.v"
 `include "tester.v"
 
 module tb;
@@ -27,7 +28,7 @@ tester test(
 );
 
 initial begin
-    $dumpfile("tb_calculadora8bit.vcd");
+    $dumpfile("tb_synth.vcd");
     $dumpvars;
 end
 

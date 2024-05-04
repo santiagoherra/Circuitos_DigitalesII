@@ -1,6 +1,6 @@
 `include "synth.v"
-`include "../trabajo_clase/yosys/cmos_cells_delay.v"
-`include "tester.v"
+`include "cmos_cells_delay.v"
+`include "tester_sint.v"
 
 module tb;
     wire  clk, en, rst;

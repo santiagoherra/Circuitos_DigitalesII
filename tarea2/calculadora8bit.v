@@ -15,28 +15,28 @@ begin
     if(en)begin
     case (MODO)
         SUMA: begin
-            c <= a + b;
+            c = a + b;
             end
         
         RESTA: begin
-            c <= a - b;
+            c = a - b;
                 end
         
         MULTIPLICA: begin
-            c <= a * b;
+            c = a * b;
                     end
 
         LEFTSHIFT: begin
-            c <= a >> b;
+            c = a >> b;
                     end
 
         default: 
-            c <=0;
+            c = 0;
 
     endcase
     end
     if(rst)begin
-        c <= 0;
+        c = 0;
     end
 end
     

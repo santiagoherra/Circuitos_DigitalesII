@@ -30,13 +30,14 @@ module controlador(
     output reg pin_incorrecto,
     output reg bloqueo,
     output reg advertencia
-    output reg comsion,
+    output reg comision,
 );
 
+parameter PIN_BUENO = 3721 //numeros finales de mi carne
 reg [63:0] balance;
-reg [2:0] contador; //cuenta fallos de bits
-reg [2:0] digitos_pin; // almacena los 4 ultimos digitos del pin
-
+reg [2:0] contador_fallos; //cuenta fallos de bits
+reg [3:0] digitos_pin; // almacena los 4 ultimos digitos del pin
+reg [2:0] contador_digitos;
 
 //parameter introduce_tarjeta = 0;
 //parameter bcr_tarjeta = 1;
@@ -60,11 +61,13 @@ always@(posedge clk) begin
 end
 
 always@(*) begin
-    if (tarjeta_recibida =1) begin
-        if (tipo_tarjeta=1)
-            comsion=1;
+    if (tarjeta_recibida <= 1) begin
+        if (tipo_tarjeta <= 1)
+            comision = 1;
 
-        //for para revisar pin
+        //for para revisar pin (DIGITO)
+        for()
+        
 
         if (tipo_transaccion)=0 begin //deposito
             balance = balance + monto;
@@ -84,3 +87,44 @@ always@(*) begin
     end
 end    
 endmodule
+
+//Version de maquina de esatdos con switch case
+always@(*)begin
+    case(estado)
+        DIGITO:begin
+            for(i = 0, i < 4, i++)begin
+                //falta la parte de dividir el pin de la entrada en cada digitos
+                //osea pimero 3 -> 7 ... separarlo en el registro digitos_pin
+                if(digito)begin
+                    #1 digito_stb <= 1; //duracion de salida
+                    if(digito == digitos_pin)begin //si el digito de entrada coincide con el carne
+                        contador_digitos += 1;
+                    end
+                end
+            end
+            if(contador_digitos == 4)begin//significa que el pin ingresa esta bueno
+                next_state = TIPO_TRANSACCION;
+            end else begin
+                pin_incorrecto <= 1; //salida 
+                contador_fallos += 1;
+                next_state = DIGITO; //si falla vuelve a digito
+            end
+
+        end
+
+    endcase
+end
+
+//bloque always para las salidas del pin incorrecto
+always@(posedge clk or negedge clk)begin
+    if(contador_fallos == 2)begin
+        advertencia <= 1; //si falla 2 veces sale advertencia
+    end else if(contador_fallos == 3) begin
+        bloqueo <= 1;//si falla 3 veces sale bloqueo
+        reset <= 1; //preguntar como hacer para que reset tambien funcione como una salida
+    end 
+end
+
+
+
+

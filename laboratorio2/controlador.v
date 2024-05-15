@@ -33,11 +33,16 @@ module controlador(
     output reg comision,
 );
 
-parameter PIN_BUENO = 3721 //numeros finales de mi carne
+parameter PIN_BUENO = 3721 //numeros finales de mi carne que es el PIn de la tarjeta
 reg [63:0] balance;
 reg [2:0] contador_fallos; //cuenta fallos de bits
 reg [3:0] digitos_pin; // almacena los 4 ultimos digitos del pin
-reg [2:0] contador_digitos;
+reg [2:0] contador_digitos; //cuenta los digitos de las veces que se acerto el pin
+
+//Agregar la inicializacion de los contadores,
+//archivo que se realizo en la semana 1
+
+
 
 //parameter introduce_tarjeta = 0;
 //parameter bcr_tarjeta = 1;
@@ -65,8 +70,7 @@ always@(*) begin
         if (tipo_tarjeta <= 1)
             comision = 1;
 
-        //for para revisar pin (DIGITO)
-        for()
+        //for para revisar pin (DIGITO
         
 
         if (tipo_transaccion)=0 begin //deposito

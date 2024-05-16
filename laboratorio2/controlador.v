@@ -38,6 +38,7 @@ reg [63:0] balance;
 reg [2:0] contador_fallos; //cuenta fallos de bits
 reg [3:0] digitos_pin; // almacena los 4 ultimos digitos del pin
 reg [2:0] contador_digitos; //cuenta los digitos de las veces que se acerto el pin
+reg sigue_bucle = 1; //condicion para hacer break
 
 //Agregar la inicializacion de los contadores,
 //archivo que se realizo en la semana 1
@@ -51,7 +52,8 @@ reg [2:0] contador_digitos; //cuenta los digitos de las veces que se acerto el p
 //parameter intro_pin = 4;
 //parameter intro_monto=5;
 
-always@(posedge clk) begin
+//bloque de funcionamiento de reset
+always@(posedge clk or negedge clk) begin
   if (rst) begin
     balance =0;
     contador=0;
@@ -61,62 +63,7 @@ always@(posedge clk) begin
     fondos_insuficientes=0;
     bloqueo=0;
     advertencia=0;
-  end   
-
-end
-
-always@(*) begin
-    if (tarjeta_recibida <= 1) begin
-        if (tipo_tarjeta <= 1)
-            comision = 1;
-
-        //for para revisar pin (DIGITO
-        
-
-        if (tipo_transaccion)=0 begin //deposito
-            balance = balance + monto;
-            balance_actualizado=1;
-        end
-        else if (tipo_transaccion)=1 begin //retiro
-            if (monto)> balance begin
-                fondos_insuficientes=1;
-                balance_actualizado=0;
-            end
-            else begin
-                balance_actualizado=1;
-                balance=balance-monto;
-            end
-        end
-
-    end
-end    
-endmodule
-
-//Version de maquina de esatdos con switch case
-always@(*)begin
-    case(estado)
-        DIGITO:begin
-            for(i = 0, i < 4, i++)begin
-                //falta la parte de dividir el pin de la entrada en cada digitos
-                //osea pimero 3 -> 7 ... separarlo en el registro digitos_pin
-                if(digito)begin
-                    #1 digito_stb <= 1; //duracion de salida
-                    if(digito == digitos_pin)begin //si el digito de entrada coincide con el carne
-                        contador_digitos += 1;
-                    end
-                end
-            end
-            if(contador_digitos == 4)begin//significa que el pin ingresa esta bueno
-                next_state = TIPO_TRANSACCION;
-            end else begin
-                pin_incorrecto <= 1; //salida 
-                contador_fallos += 1;
-                next_state = DIGITO; //si falla vuelve a digito
-            end
-
-        end
-
-    endcase
+    end   
 end
 
 //bloque always para las salidas del pin incorrecto
@@ -130,5 +77,56 @@ always@(posedge clk or negedge clk)begin
 end
 
 
+always@(*) begin
+    if (tarjeta_recibida <= 1) begin
+        if (tipo_tarjeta <= 1)
+            comision = 1;
 
+        if(DIGITO)begin
+            for(j = 0, i < 3, i++)begin//Este es el for para que se repita la accion del digito 3 veces
+                if(sigue_bucle)begin
+                    for(i = 0, i < 4, i++)begin
+                        //falta la parte de dividir el pin de la entrada en cada digitos
+                        //osea pimero 3 -> 7 ... separarlo en el registro digitos_pin
+                        if(digito)begin
+                            #1 digito_stb <= 1; //duracion de salida
+                            if(digito == digitos_pin)begin //si el digito de entrada coincide con el carne
+                                contador_digitos += 1;
+                            end
+                        end
+                    end
+                    if(contador_digitos == 4)begin//significa que el pin ingresa esta bueno
+                        tipo_de_transaccion <= 1;
+                        sigue_bucle <= 0;
+                    end else begin
+                        pin_incorrecto <= 1; //salida 
+                        contador_fallos += 1;
+                    end
+                end
+            end
+        end
+
+        if (!tipo_transaccion) begin //deposito
+            //funcion de monto para realizar accion:
+
+            balance = balance + monto;
+            balance_actualizado=1;
+        end
+        else if (tipo_transaccion)begin //retiro
+            //funcion de monto para realizar accion:
+
+            if (monto > balance) begin
+                fondos_insuficientes=1;
+                balance_actualizado=0;
+            end
+            else begin
+                balance_actualizado=1;
+                balance=balance-monto;
+            end
+        end
+
+    end
+end    
+
+endmodule
 

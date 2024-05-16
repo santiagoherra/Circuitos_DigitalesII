@@ -77,7 +77,7 @@ always@(posedge clk or negedge clk)begin
 end
 
 
-always@(*) begin
+always@(posedge clk or negedge clk) begin
     if (tarjeta_recibida <= 1) begin
         if (tipo_tarjeta <= 1)
             comision = 1;
@@ -88,8 +88,7 @@ always@(*) begin
                     for(i = 0, i < 4, i++)begin
                         //falta la parte de dividir el pin de la entrada en cada digitos
                         //osea pimero 3 -> 7 ... separarlo en el registro digitos_pin
-                        if(digito)begin
-                            #1 digito_stb <= 1; //duracion de salida
+                        if(digito_stb)begin //si se detecta la sennal se ejecuta
                             if(digito == digitos_pin)begin //si el digito de entrada coincide con el carne
                                 contador_digitos += 1;
                             end
@@ -107,21 +106,23 @@ always@(*) begin
         end
 
         if (!tipo_transaccion) begin //deposito
-            //funcion de monto para realizar accion:
-
-            balance = balance + monto;
-            balance_actualizado=1;
+            if(monto_stb)begin //cuando se detecta la entrada de monton se ejecuta la acccion
+                balance = balance + monto;
+                balance_actualizado = 1;
+            end
         end
         else if (tipo_transaccion)begin //retiro
-            //funcion de monto para realizar accion:
-
-            if (monto > balance) begin
-                fondos_insuficientes=1;
-                balance_actualizado=0;
-            end
-            else begin
-                balance_actualizado=1;
-                balance=balance-monto;
+            if(monto_stb)begin
+                if (monto >= balance) begin
+                    fondos_insuficientes = 1;
+                    balance_actualizado = 0;
+                end
+                else begin
+                    fondos_insuficientes = 0;
+                    balance = balance - monto;
+                    balance_actualizado = 1;
+                    entregar_dinero = 1;
+                end
             end
         end
 

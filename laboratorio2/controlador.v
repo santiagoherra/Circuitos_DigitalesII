@@ -105,14 +105,14 @@ always@(posedge clk or negedge clk) begin
         else if (tipo_transaccion)begin //retiro
             if(monto_stb)begin
                 if (monto >= balance) begin
-                    fondos_insuficientes = 1;
-                    balance_actualizado = 0;
-                end
-                else begin
-                    fondos_insuficientes = 0;
                     balance = balance - monto;
                     balance_actualizado = 1;
                     entregar_dinero = 1;
+                    fondos_insuficientes = 0;
+                end
+                else begin
+                    fondos_insuficientes = 1;
+                    balance_actualizado = 0;
                 end
             end
         end

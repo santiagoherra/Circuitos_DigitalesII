@@ -24,7 +24,7 @@ module controlador(
     input [31:0] monto,
     input monto_stb,
 
-    output reg [63:0] balance_actualizado, //se;al
+    output reg balance_actualizado, //se;al
     output reg entregar_dinero,
     output reg fondos_insuficientes,
     output reg pin_incorrecto,
@@ -39,7 +39,7 @@ reg [2:0] contador_fallos; //cuenta fallos de bits
 reg [3:0] digitos_pin; // almacena los 4 ultimos digitos del pin
 reg [2:0] contador_digitos; //cuenta los digitos de las veces que se acerto el pin
 reg sigue_bucle = 1; //condicion para hacer break
-integer i, j;
+integer i, j; //inetegers de for
 
 //parameter introduce_tarjeta = 0;
 //parameter bcr_tarjeta = 1;

@@ -45,7 +45,6 @@ end
         pin=0;
         digito=0;
         digito_stb =0;
-        tipo_transaccion =0;
         monto=0;
         monto_stb =0;
 
@@ -53,85 +52,49 @@ end
     #10
     tarjeta_recibida=1;
     tipo_tarjeta=1; //cobra comision
-    pin=1150284387653948;
-    //pone mal el pin 3 veces y se bloquea  
+     
 
     //pin: 6533 
     #10
+    pin = 6;
     digito_stb=1;
     digito=6;
     #10
     digito_stb=0;
     #5
+    pin = 5;
     digito_stb=1;
     digito=5;
     #10
     digito_stb=0;   
     #5
+    pin = 3;
     digito_stb=1;
     digito=3;
     #10
     digito_stb=0;
     #5
+    pin = 3;
     digito_stb=1;
     digito=3;
     #10
     digito_stb=0;
-    //pin 2:1233
-    #5
-    digito_stb=1;
-    digito=1;
-    #10
-    digito_stb=0;
-    #5
-    digito_stb=1;
-    digito=2;
-    #10
-        digito_stb=0;
-    #5
-    digito_stb=1;
-    digito=3;
-    #10
-        digito_stb=0;
-    #5
-    digito_stb=1;
-    digito=3;
-    #10
-        digito_stb=0;
-    #5
-    //pin 3: 3049
-    digito_stb=1;
-    digito=3;
-    #10    
-    digito_stb=0;
-    #5
-    digito_stb=1;
-    digito=0;
-    #10
-        digito_stb=0;
-    #5
-    digito_stb=1;
-    digito=4;
-    #10
-        digito_stb=0;
-    #5
-    digito_stb=1;
-    digito=9;
-    #10
-        digito_stb=0;
-    #5
+    //Se debe de aceptar el pin
 
-    rst=1;
-        tipo_tarjeta=0;
-        tarjeta_recibida=0;
-        tipo_tarjeta =0;
-        pin=0;
-        digito=0;
-        digito_stb =0;
-        tipo_transaccion =0;
-        monto=0;
-        monto_stb =0;
+    #20
+    tipo_transaccion = 0;
     #10
+    monto_stb = 1;
+    monto = 2000;
+    #10
+    
+
+    #50 //termina caso 1
+
+    //Reset para comenzar caso 2
+    rst=1;
+
+    #20
     rst=0;
     #10
 

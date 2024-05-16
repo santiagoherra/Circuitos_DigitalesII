@@ -30,7 +30,7 @@ controlador DUT(
     .comision(comision)
 );
 
-test tester(
+tester test(
     .clk(clk),
     .rst(rst),
     .tarjeta_recibida(tarjeta_recibida),

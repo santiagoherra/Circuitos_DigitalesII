@@ -47,7 +47,6 @@ end
     pin=0;
     digito=0;
     digito_stb =0;
-    tipo_trans =0;
     monto=0;
     monto_stb =0;
     
@@ -96,19 +95,98 @@ end
     monto_stb =0;
     #40
     rst=1;
-    tipo_de_tarjeta=0;
-    tarjeta_recibida=0;
-    tipo_de_tarjeta =0;
-    pin=0;
-    digito=0;
-    digito_stb =0;
-    tipo_trans =0;
-    monto=0;
+    digito = 0;
+    monto = 0;
+    tarjeta_recibida = 0;
+    tipo_de_tarjeta = 0;
+
     #10
     rst=0;
     #10
 
-  
+    //Caso 2
+    #10
+    tarjeta_recibida=1;
+    tipo_de_tarjeta = 0; //No cobra comision
+    #25
+   
+    digito=4'b1101; //digito 1
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;
+    #10
+ 
+    digito=4'b0100; //digito 2
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;   
+    #10
+
+    digito=4'b1101; //digito 3
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;
+    #10
+
+    digito=4'b1101; //digito 4
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;
+    #10
+
+    tipo_trans = 1; //
+    monto=32'b000000000000100111000100000; //20000
+    #10
+    monto_stb=1;
+    #10
+    monto_stb =0;
+    #40
+
+    rst=1;
+    digito = 0;
+    monto = 0;
+    tarjeta_recibida = 0;
+    tipo_de_tarjeta = 0;
+    #10
+    rst=0;
+    #10
+
+    //Caso 3
+     #10
+    tarjeta_recibida=1;
+    tipo_de_tarjeta = 0; //No cobra comision
+    #25
+   
+    digito=4'b1001; //digito 1
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;
+    #10
+ 
+    digito=4'b0000; //digito 2
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;   
+    #10
+
+    digito=4'b1001; //digito 3
+    #10
+    digito_stb=1;
+    #10
+    digito_stb=0;
+    #10
+
+    //Falla el ingreso del pin
+    rst = 1;
+    #50
+
+    //Se terminan las pruebas.
     $finish; 
     end
 endmodule

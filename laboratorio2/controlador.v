@@ -35,11 +35,13 @@ module controlador(
 // Comprueba que el pin es correcto
 reg [2:0] correcto; 
 // Valor de balance original 50.000
-reg [63:0] balance = 63'b0000000000000000000000000000000000000001100001101010000; 
+reg [63:0] balance = 50000; 
 // Cuenta los intentos fallidos
 reg [2:0] contador_fallos; 
 // Cuenta la cantidad de dígitos ingresados
 reg [2:0] contador_digitos; 
+
+reg coincidencia;
 
 // Bloque de funcionamiento de reset, inicializa en 0
 always @(posedge clk) begin
@@ -54,12 +56,12 @@ always @(posedge clk) begin
         contador_digitos <= 0;
         contador_fallos <= 0;
         correcto <= 0;
+        coincidencia = 0;
     end   
 end
 
 always @(*) begin
     if (tarjeta_recibida == 1 && tipo_de_tarjeta == 1) begin
-        // Validación de comisión
         comision = 1;
     end else begin
         comision = 0;
@@ -70,8 +72,8 @@ always @(*) begin
             if (monto > balance) begin
                 fondos_insuficientes = 1;
             end else begin              
-                balance_actualizado = 1;
                 balance = balance - monto;
+                balance_actualizado = 1;
                 entregar_dinero = 1;
             end
         end else if (!tipo_trans) begin
@@ -82,24 +84,25 @@ always @(*) begin
 
     if (digito_stb && contador_digitos != 4) begin
         contador_digitos = contador_digitos + 1;
-    
+
+        // Bandera para controlar si ya se encontró una coincidencia
+        coincidencia = 0;
         for (integer i = 0; i < 4; i = i + 1) begin
-            if (pin[i*4 +: 4] == digito) begin // Comprueba cada 4 bits
+            if (!coincidencia && pin[i*4 +: 4] == digito) begin // Comprueba cada 4 bits
                 correcto = correcto + 1;
+                coincidencia = 1; // Se ha encontrado una coincidencia
             end
         end
     end
 
     // Contador correcto es menor a 4 entonces pin incorrecto
     if (digito_stb && correcto != 4 && contador_digitos == 4) begin
-        if (contador_fallos < 2) begin
             contador_fallos = contador_fallos + 1;
             pin_incorrecto = 1; // Salida 
             #10
             contador_digitos = 0;
             correcto = 0;
             pin_incorrecto = 0;
-        end
     end    
 
     // Con dos fallos se enciende advertencia
@@ -126,4 +129,17 @@ always @(*) begin
     end    
 end
 
+always@(posedge clk or negedge clk)begin
+    if(contador_fallos == 1)begin
+        pin_incorrecto <= 1;
+    end else if(contador_fallos == 2)begin
+        advertencia <= 1; //si falla 2 veces sale advertencia
+    end 
+    else if(contador_fallos == 3) begin
+        bloqueo <= 1;//si falla 3 veces sale bloqueo
+
+    end 
+end
+
 endmodule
+ 

@@ -11,20 +11,19 @@ Archivo: testbench.v une controlador.v y tester.v
 DUT de la Controlador de tarjetas del banco para retiros y depósitos
 
 *********************/
-
 module controlador(
     input clk,
     input rst,
     input tarjeta_recibida,
-    input tipo_tarjeta,
+    input tipo_de_tarjeta,
     input [15:0] pin,
     input [3:0] digito,
     input digito_stb,
-    input tipo_transaccion,
+    input tipo_trans,
     input [31:0] monto,
     input monto_stb,
 
-    output reg balance_actualizado, 
+    output reg balance_actualizado, //señal
     output reg entregar_dinero,
     output reg fondos_insuficientes,
     output reg pin_incorrecto,
@@ -33,84 +32,98 @@ module controlador(
     output reg comision
 );
 
+// Comprueba que el pin es correcto
+reg [2:0] correcto; 
+// Valor de balance original 50.000
+reg [63:0] balance = 63'b0000000000000000000000000000000000000001100001101010000; 
+// Cuenta los intentos fallidos
+reg [2:0] contador_fallos; 
+// Cuenta la cantidad de dígitos ingresados
+reg [2:0] contador_digitos; 
 
-reg [63:0] balance = 5000; //valor de balance original
-reg [2:0] contador_fallos; //cuenta fallos de bits
-reg [2:0] contador_digitos; //cuenta los digitos de las veces que se acerto el pin
-reg sigue_bucle = 1; //condicion para hacer break
-integer j; //inetegers de for
-
-//bloque de funcionamiento de reset
-always@(posedge clk or negedge clk) begin
-  if (rst) begin
-    contador_digitos = 0;
-    contador_fallos = 0;
-    balance_actualizado = 0;
-    entregar_dinero = 0;
-    pin_incorrecto = 0;
-    fondos_insuficientes = 0;
-    bloqueo = 0;
-    advertencia = 0;
+// Bloque de funcionamiento de reset, inicializa en 0
+always @(posedge clk) begin
+    if (rst) begin
+        balance_actualizado <= 0;
+        entregar_dinero <= 0;
+        fondos_insuficientes <= 0;
+        pin_incorrecto <= 0;
+        bloqueo <= 0;
+        advertencia <= 0;
+        comision <= 0;
+        contador_digitos <= 0;
+        contador_fallos <= 0;
+        correcto <= 0;
     end   
 end
 
-//bloque always para las salidas del pin incorrecto
-always@(posedge clk or negedge clk)begin
-    if(contador_fallos == 1)begin 
-        #10 pin_incorrecto = 1;
-    end else if(contador_fallos == 2)begin
-        #10 advertencia <= 1; //si falla 2 veces sale advertencia
-    end else if(contador_fallos == 3) begin
-        bloqueo <= 1;//si falla 3 veces sale bloqueo
-        //reset <= 1; //preguntar como hacer para que reset tambien funcione como una salida
-    end 
+always @(*) begin
+    if (tarjeta_recibida == 1 && tipo_de_tarjeta == 1) begin
+        // Validación de comisión
+        comision = 1;
+    end else begin
+        comision = 0;
+    end
+
+    if (correcto == 3'b100 && monto_stb) begin 
+        if (tipo_trans == 1) begin
+            if (monto > balance) begin
+                fondos_insuficientes = 1;
+            end else begin              
+                balance_actualizado = 1;
+                balance = balance - monto;
+                entregar_dinero = 1;
+            end
+        end else if (!tipo_trans) begin
+            balance = balance + monto;
+            balance_actualizado = 1;
+        end
+    end
+
+    if (digito_stb && contador_digitos != 4) begin
+        contador_digitos = contador_digitos + 1;
+    
+        for (integer i = 0; i < 4; i = i + 1) begin
+            if (pin[i*4 +: 4] == digito) begin // Comprueba cada 4 bits
+                correcto = correcto + 1;
+            end
+        end
+    end
+
+    // Contador correcto es menor a 4 entonces pin incorrecto
+    if (digito_stb && correcto != 4 && contador_digitos == 4) begin
+        if (contador_fallos < 2) begin
+            contador_fallos = contador_fallos + 1;
+            pin_incorrecto = 1; // Salida 
+            #10
+            contador_digitos = 0;
+            correcto = 0;
+            pin_incorrecto = 0;
+        end
+    end    
+
+    // Con dos fallos se enciende advertencia
+    if (contador_fallos == 2)
+        advertencia = 1;
+
+    // Bloquea si 3 intentos fallidos
+    if (contador_fallos == 3) begin
+        advertencia = 0;
+        bloqueo = 1;
+    end
+
+    // Tercer intento incorrecto
+    if (correcto != 4 && contador_digitos == 4 && contador_fallos == 2) begin
+        pin_incorrecto = 1;
+        advertencia = 1;
+        contador_fallos = contador_fallos + 1;
+        #10
+        pin_incorrecto = 0;
+        advertencia = 0;     
+        bloqueo = 1;   
+        contador_digitos = 0;
+        correcto = 0;     
+    end    
 end
 
-
-always@(posedge clk or negedge clk) begin
-    if (tarjeta_recibida <= 1) begin
-        if (tipo_tarjeta <= 1)
-            comision = 1;
-
-        
-        for(j = 0; j < 4; j = j + 1)begin//Este es el for para que se repita la accion del digito 3 veces
-            if(sigue_bucle)begin
-                if(digito_stb)begin
-                    if(digito == pin)begin //si el digito de entrada coincide con el carne
-                        contador_digitos += 1;
-                    end else begin //falle el acierto
-                        contador_fallos += 1;
-                    end
-                    if(contador_fallos == 3)begin//si falla 3 veces se sale del blucle
-                        sigue_bucle = 0;
-                    end
-                end
-            end
-        end
-
-        if (!tipo_transaccion) begin //deposito
-            if(monto_stb)begin //cuando se detecta la entrada de monton se ejecuta la acccion
-                balance = balance + monto;
-                balance_actualizado = 1;
-            end
-        end
-        else if (tipo_transaccion)begin //retiro
-            if(monto_stb)begin
-                if (monto >= balance) begin
-                    balance = balance - monto;
-                    balance_actualizado = 1;
-                    entregar_dinero = 1;
-                    fondos_insuficientes = 0;
-                end
-                else begin
-                    fondos_insuficientes = 1;
-                    balance_actualizado = 0;
-                end
-            end
-        end
-
-    end
-end    
-
 endmodule
-

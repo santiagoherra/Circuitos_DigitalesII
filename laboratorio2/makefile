@@ -1,9 +1,11 @@
-#Tarea 2 Evelyn Feng Wu B82870
-##Circuitos Digitales II
-##Archivo: calculadora.v
-##Prof. Ing. Ana Eugenia Sanchez Villalobos
+# Laboratorio 2 
+# Santiago Herra Castro C13721
+# Evelyn Feng Wu B82870
+# Circuitos Digitales II
 
-#Este es el makefile de la Tarea 2
+# Prof. Ing. Ana Eugenia Sanchez Villalobos
+
+# Este es el makefile del Lab 2
 
 verilog:
 	iverilog -o tb.vvp testbench.v 

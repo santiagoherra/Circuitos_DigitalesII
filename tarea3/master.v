@@ -14,6 +14,12 @@ reg [4:0] count;
 
 
 //parametros de estados
+parameter inicioFinal 0;
+parameter cicloArribaSlave1 1;
+parameter cicloAbajoSlave2 2;
+parameter cicloArribaSlave1 3;
+parameter cicloAbajoSlave2 4;
+
 
 
 

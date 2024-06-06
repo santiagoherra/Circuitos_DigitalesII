@@ -95,7 +95,7 @@ always @(posedge clk) begin
                 end
             end
 
-            default: state <= 0;
+            default: state <= inicioFinal;
         endcase
     end
 end

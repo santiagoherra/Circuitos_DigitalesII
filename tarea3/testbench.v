@@ -20,6 +20,7 @@ master uut (
     .counter(counter)
 );
 
+
 always #5 clk = !clk;
 
 initial begin

@@ -12,13 +12,13 @@ reg activador;
 
 always @(posedge SCLK) begin //polaridad positiva
 
+    if(CS)begin
+        termino <= termino + 1;
+    end
+
     if(count_slave != 0)
         if(count_master == 0)begin 
             activador = 1;
-        end
-
-        if(CS)begin
-            termino <= termino + 1;
         end
 
         if(termino != 2)begin
@@ -29,4 +29,4 @@ always @(posedge SCLK) begin //polaridad positiva
         end
     end
 
-endmodule
+endmodule   

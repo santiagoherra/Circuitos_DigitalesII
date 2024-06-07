@@ -35,40 +35,42 @@ always @(negedge clk or posedge clk) begin
     
     end else begin
         case (state)
+            //Inicio para elegir el slave que se desea usar.
             inicioFinal : begin
                 SCLK <= 0;
                 state = SLAVE_SELECT ? inicioFinal_slave1 : inicioFinal_slave2;
             end 
 
-            inicioFinal_slave1 : begin
+            //estados necesarios para el slave 1
+           
+           inicioFinal_slave1 : begin
                 SCLK <= 0;
-                CS_SLAVE1 <= 1;
-                if(count == 0)begin
-                    state <= inicioFinal;
-                    CS_SLAVE1 <= 0;
-                end 
-                count <= 16;
-                state <= cicloArribaSlave1;
+                if(contador_final == 31 || contador_final == 0)begin
+                    CS_SLAVE1 <= 1;
+                end
+                state <= (contador_final == 31) ? inicioFinal_slave1 : cicloArribaSlave1;
             end 
 
             cicloArribaSlave1 :  begin
-                SCLK <= 0;
+                SCLK <= 1;
                 CS_SLAVE1 <= 0;
+                contador_final = contador_final + 1;
                 MOSI <= datain[count - 1];
                 count <= count - 1;
                 state <= cicloAbajoSlave1;
 
             end
             cicloAbajoSlave1 : begin
-                SCLK <= 1;
-                if(count > 0) begin
+                SCLK <= 0;
+                if(16 > count > 0) begin
                     state <= cicloArribaSlave1;
                 end else begin
-                    CS_SLAVE1 <= 1;
                     state <= inicioFinal_slave1;
                 end
             end
             
+            //estados necesarios para el slave 2
+
             inicioFinal_slave2 : begin
                 SCLK <= 0;
                 if(contador_final == 31 || contador_final == 0)begin

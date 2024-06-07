@@ -5,24 +5,19 @@ module tb_top;
     reg clk;
     reg reset;
     reg SLAVE_SELECT;
-    reg [15:0] datain;
+    reg [15:0] master_mosi;
+    reg [15:0] datain_tb;
 
     // Instancia del módulo top
     top uut (
         .clk(clk),
         .reset(reset),
-        .SLAVE_SELECT(SLAVE_SELECT)
+        .SLAVE_SELECT(SLAVE_SELECT),
+        .dataintop(datain_tb)
     );
 
     // Generador de reloj
     always #5 clk = ~clk;
-
-    always @(negedge clk or posedge clk) begin
-        if (reset == 0) begin
-            // Simular la escritura de datos desde master a slaves
-            uut.master_inst.MOSI <= datain;
-        end
-    end
 
     initial begin
         $monitor("Time = %0t | clk = %b | reset = %b | SLAVE_SELECT = %b | state = %b | SCLK = %b | CS_SLAVE1 = %b | CS_SLAVE2 = %b | MOSI = %h | MISO_SLAVE1 = %h | MISO_SLAVE2 = %h",
@@ -34,7 +29,7 @@ module tb_top;
         clk = 0;
         reset = 1;
         SLAVE_SELECT = 0;
-        datain = 16'hAFAF;
+        datain_tb = 16'hAAAA;
         
         // Esperar un ciclo de reloj
         #10;
@@ -42,13 +37,19 @@ module tb_top;
         // Liberar reset
         reset = 0;
         
+        #10
         // Simulación de selección de slave
         SLAVE_SELECT = 0; // Seleccionar slave 1
         #10
     
-        #100;
+        #400;
+
+        reset = 0;
+
+        #20
+        
         SLAVE_SELECT = 1; // Seleccionar slave 2
-        #100;
+        #400;
         
         // Finalizar simulación
         $finish;

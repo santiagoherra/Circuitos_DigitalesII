@@ -6,7 +6,8 @@
 module top (
     input clk,
     input reset,
-    input SLAVE_SELECT
+    input SLAVE_SELECT,
+    input [15:0] dataintop
 );
 
 // Interconexión de señales
@@ -20,7 +21,7 @@ wire [15:0] MISO_SLAVE2;
 wire [15:0] MISO_MASTER;
 
 // Selección de MISO del master basado en cuál slave está activo
-assign MISO_MASTER = (CS_SLAVE1 == 1'b0) ? MISO_SLAVE1 : MISO_SLAVE2;
+assign MISO_MASTER = (SLAVE_SELECT) ? MISO_SLAVE1 : MISO_SLAVE2;
 
 // Instancia del master
 master master_inst (
@@ -28,6 +29,7 @@ master master_inst (
     .reset(reset),
     .MISO(MISO_MASTER),
     .SLAVE_SELECT(SLAVE_SELECT),
+    .datain(dataintop),
     .CS_SLAVE1(CS_SLAVE1),
     .CS_SLAVE2(CS_SLAVE2),
     .SCLK(SCLK),

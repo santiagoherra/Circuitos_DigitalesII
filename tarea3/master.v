@@ -3,6 +3,7 @@ module master (
     input reset,
     input [15:0] MISO,
     input SLAVE_SELECT,
+    input [15:0] datain,
     output reg CS_SLAVE1,
     output reg CS_SLAVE2,
     output reg SCLK,
@@ -11,6 +12,7 @@ module master (
 );
 
 reg [2:0] state;
+reg [4:0] contador_final;
 
 //parametros de estados
 parameter inicioFinal = 0;
@@ -21,7 +23,7 @@ parameter cicloAbajoSlave1 = 4;
 parameter cicloArribaSlave2 = 5;
 parameter cicloAbajoSlave2 = 6;
 
-always @(posedge clk) begin
+always @(negedge clk or posedge clk) begin
     if(reset) begin
         MOSI <= 16'b0;
         CS_SLAVE1 <= 1'b0;
@@ -29,6 +31,7 @@ always @(posedge clk) begin
         count <= 16'd16;
         SCLK <= 1'b0; //porque nada puede empezar hasta el CS no baje
         state <= 0;
+        contador_final <= 0;
     
     end else begin
         case (state)
@@ -51,7 +54,7 @@ always @(posedge clk) begin
             cicloArribaSlave1 :  begin
                 SCLK <= 0;
                 CS_SLAVE1 <= 0;
-                MOSI <= MISO[count - 1];
+                MOSI <= datain[count - 1];
                 count <= count - 1;
                 state <= cicloAbajoSlave1;
 
@@ -68,29 +71,26 @@ always @(posedge clk) begin
             
             inicioFinal_slave2 : begin
                 SCLK <= 0;
-                CS_SLAVE2 <= 1;
-                if(count == 0)begin
-                    state <= inicioFinal;
-                    CS_SLAVE2 <= 0;
+                if(contador_final == 31 || contador_final == 0)begin
+                    CS_SLAVE2 <= 1;
                 end
-                count <= 16;
-                state <= cicloArribaSlave2;
+                state <= (contador_final == 31) ? inicioFinal_slave2 : cicloArribaSlave2;
             end 
 
             cicloArribaSlave2 :  begin
-                SCLK <= 0;
+                SCLK <= 1;
                 CS_SLAVE2 <= 0;
-                MOSI <= MISO[count - 1];
+                contador_final = contador_final + 1;
+                MOSI <= datain[count - 1];
                 count <= count - 1;
                 state <= cicloAbajoSlave2;
 
             end
             cicloAbajoSlave2 : begin
-                SCLK <= 1;
-                if(count > 0) begin
+                SCLK <= 0;
+                if(16 > count > 0) begin
                     state <= cicloArribaSlave2;
                 end else begin
-                    CS_SLAVE2 <= 1;
                     state <= inicioFinal_slave2;
                 end
             end

@@ -1,4 +1,4 @@
 all:
-iverilog testbench.v
-vvp tb_top.vcd
-gtkwave tb_top.vcd
+	iverilog testbench.v
+	vvp a.out
+	gtkwave tb_top.vcd

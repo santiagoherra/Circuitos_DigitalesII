@@ -6,31 +6,33 @@ module slave2(
     output reg [15:0] MISO
 );
 
-reg [1:0] termino = 0;
 reg [15:0] count_slave = 16;
-reg activador;
-reg [15: 0] datos_guardados;
+reg activador = 0;
+reg [15:0] datos_guardados;
 
-always @(posedge SCLK) begin //polaridad positiva
-    if(count_master < 17)begin
-        datos_guardados[count_master] = MOSI
-    end 
+always @(posedge SCLK) begin
+    if (CS) begin
+        // Reiniciar variables cuando CS está activo
+        count_slave <= 16;
+        activador <= 0;
+    end else begin
+        // Capturar datos desde MOSI
+        if (count_master <= 16) begin
+            datos_guardados[count_master] <= MOSI;
+        end 
 
-    if(CS)begin
-        termino <= termino + 1;
-    end
-
-    if(count_slave != 0)
-        if(count_master == 0)begin 
-            activador = 1;
+        // Activar el envío de datos a MISO
+        if (count_master == 0) begin
+            activador <= 1;
         end
 
-        if(termino != 2)begin
-            if(activador)begin
-                MISO <= datos_guardados[count_slave - 1]; //little endian
-                count_slave = count_slave - 1;
+        if (activador) begin
+            if (count_slave != 0) begin
+                MISO <= datos_guardados[count_slave - 1]; // little endian
+                count_slave <= count_slave - 1;
             end
         end
     end
+end
 
-endmodule   
+endmodule

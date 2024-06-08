@@ -90,7 +90,7 @@ always @(negedge clk or posedge clk) begin
             end
             cicloAbajoSlave2 : begin
                 SCLK <= 0;
-                if(16 > count > 0) begin
+                if(31 > contador_final > 0) begin
                     state <= cicloArribaSlave2;
                 end else begin
                     state <= inicioFinal_slave2;

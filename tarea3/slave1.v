@@ -1,4 +1,4 @@
-module slave1(
+module slave2(
     input SCLK,
     input [15:0] MOSI,
     input CS,
@@ -6,21 +6,19 @@ module slave1(
     output reg [15:0] MISO
 );
 
-reg [1:0] termino;
-reg [15:0] count_slave;
-reg activador;
+reg [15:0] count_slave = 16;
+reg activador = 0;
 reg [15:0] datos_guardados;
 
 always @(posedge SCLK) begin
     if (CS) begin
         // Reiniciar variables cuando CS está activo
-        termino <= termino + 1;
         count_slave <= 16;
         activador <= 0;
     end else begin
         // Capturar datos desde MOSI
-        if (count_master < 16) begin
-            datos_guardados[count_master] <= MOSI[count_master];
+        if (count_master <= 16) begin
+            datos_guardados[count_master] <= MOSI;
         end 
 
         // Activar el envío de datos a MISO

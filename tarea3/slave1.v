@@ -9,8 +9,12 @@ module slave1(
 reg [1:0] termino = 0;
 reg [15:0] count_slave = 16;
 reg activador;
+reg [15: 0] datos_guardados;
 
 always @(posedge SCLK) begin //polaridad positiva
+    if(count_master < 17)begin
+        datos_guardados[count_master] = MOSI
+    end 
 
     if(CS)begin
         termino <= termino + 1;
@@ -23,7 +27,7 @@ always @(posedge SCLK) begin //polaridad positiva
 
         if(termino != 2)begin
             if(activador)begin
-                MISO <= MOSI[count_slave - 1]; //little endian
+                MISO <= datos_guardados[count_slave - 1]; //little endian
                 count_slave = count_slave - 1;
             end
         end

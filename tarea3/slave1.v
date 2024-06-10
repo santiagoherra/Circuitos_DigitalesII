@@ -1,4 +1,4 @@
-module slave2(
+module slave1(
     input SCLK,
     input [15:0] MOSI,
     input CS,
@@ -28,7 +28,7 @@ always @(posedge SCLK) begin
 
         if (activador) begin
             if (count_slave != 0) begin
-                MISO <= datos_guardados[count_slave - 1]; // little endian
+                MISO <= datos_guardados[count_slave - 1]; // Big endian
                 count_slave <= count_slave - 1;
             end
         end

@@ -12,7 +12,9 @@ module master (
 );
 
 reg [2:0] state;
-reg [4:0] contador_final;
+reg [5:0] contador_final;
+reg [15:0] datos_recibidos;
+reg [15:0] count_recibir;
 
 //parametros de estados
 parameter inicioFinal = 0;
@@ -32,7 +34,9 @@ always @(negedge clk or posedge clk) begin
         SCLK <= 1'b0; //porque nada puede empezar hasta el CS no baje
         state <= 0;
         contador_final <= 0;
-    
+        count_recibir <= 16;
+        datos_recibidos <= 0;
+        
     end else begin
         case (state)
             //Inicio para elegir el slave que se desea usar.
@@ -73,10 +77,10 @@ always @(negedge clk or posedge clk) begin
 
             inicioFinal_slave2 : begin
                 SCLK <= 0;
-                if(contador_final == 31 || contador_final == 0)begin
+                if(contador_final == 32 || contador_final == 0)begin
                     CS_SLAVE2 <= 1;
                 end
-                state <= (contador_final == 31) ? inicioFinal_slave2 : cicloArribaSlave2;
+                state <= (contador_final == 32) ? inicioFinal_slave2 : cicloArribaSlave2;
             end 
 
             cicloArribaSlave2 :  begin
@@ -85,12 +89,16 @@ always @(negedge clk or posedge clk) begin
                 contador_final = contador_final + 1;
                 MOSI <= datain[count - 1];
                 count <= count - 1;
+                if(contador_final > 16)begin
+                    datos_recibidos[count_recibir] <= MISO;
+                    count_recibir = count_recibir - 1;
+                end
                 state <= cicloAbajoSlave2;
 
             end
             cicloAbajoSlave2 : begin
                 SCLK <= 0;
-                if(31 > contador_final > 0) begin
+                if(32 > contador_final > 0) begin
                     state <= cicloArribaSlave2;
                 end else begin
                     state <= inicioFinal_slave2;

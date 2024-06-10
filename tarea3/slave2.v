@@ -28,7 +28,7 @@ always @(posedge SCLK) begin
 
         if (activador) begin
             if (count_slave != 0) begin
-                MISO <= datos_guardados[count_slave - 1]; // little endian
+                MISO <= datos_guardados[count_slave - 1]; // big endian
                 count_slave <= count_slave - 1;
             end
         end

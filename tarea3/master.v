@@ -49,10 +49,10 @@ always @(negedge clk or posedge clk) begin
            
            inicioFinal_slave1 : begin
                 SCLK <= 0;
-                if(contador_final == 31 || contador_final == 0)begin
+                if(contador_final == 32 || contador_final == 0)begin
                     CS_SLAVE1 <= 1;
                 end
-                state <= (contador_final == 31) ? inicioFinal_slave1 : cicloArribaSlave1;
+                state <= (contador_final == 32) ? inicioFinal_slave1 : cicloArribaSlave1;
             end 
 
             cicloArribaSlave1 :  begin
@@ -61,18 +61,22 @@ always @(negedge clk or posedge clk) begin
                 contador_final = contador_final + 1;
                 MOSI <= datain[count - 1];
                 count <= count - 1;
+                if(contador_final > 16)begin
+                    datos_recibidos[count_recibir] <= MISO;
+                    count_recibir = count_recibir - 1;
+                end
                 state <= cicloAbajoSlave1;
 
             end
             cicloAbajoSlave1 : begin
                 SCLK <= 0;
-                if(16 > count > 0) begin
+                if(32 > contador_final > 0) begin
                     state <= cicloArribaSlave1;
                 end else begin
                     state <= inicioFinal_slave1;
                 end
             end
-            
+
             //estados necesarios para el slave 2
 
             inicioFinal_slave2 : begin

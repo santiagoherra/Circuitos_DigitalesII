@@ -28,7 +28,6 @@ module tb_top;
         // Inicialización
         clk = 0;
         reset = 1;
-        SLAVE_SELECT = 0;
         datain_tb = 16'hAAAA;
         
         // Esperar un ciclo de reloj
@@ -39,16 +38,19 @@ module tb_top;
         
         #10
         // Simulación de selección de slave
-        SLAVE_SELECT = 0; // Seleccionar slave 1
+        SLAVE_SELECT = 1; // Seleccionar slave 1
         #10
     
         #400;
 
-        reset = 0;
+        reset = 1;
 
         #20
+
+        reset = 0;   
+        SLAVE_SELECT = 0; // Seleccionar slave 2
+
         
-        SLAVE_SELECT = 1; // Seleccionar slave 2
         #400;
         
         // Finalizar simulación
